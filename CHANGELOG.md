@@ -1,6 +1,16 @@
 CHANGELOG
 =========
 
+v0.6.0
+------
+
+* Symfony 6.4 and 7.x compatibility (Symfony 5.4 still supported)
+* API Platform 3 compatibility (`_api_operation_name` is used when `_api_item_operation_name` is missing)
+* Require PHP 8.1+, Symfony 5.4+ and API Platform 2.7+
+* Use `isMainRequest()` and `TokenInterface::getUserIdentifier()` instead of the APIs removed in Symfony 6
+* Add native return types
+* Remove phpspec/prophecy usage from the test suite and test against Symfony 5.4, 6.4 and 7.x in CI
+
 v0.5.0
 ------
 

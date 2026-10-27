@@ -23,4 +23,6 @@ EOT;
     exit(1);
 }
 
-AnnotationRegistry::registerLoader([$loader, 'loadClass']);
+if (method_exists(AnnotationRegistry::class, 'registerLoader')) {
+    AnnotationRegistry::registerLoader([$loader, 'loadClass']);
+}

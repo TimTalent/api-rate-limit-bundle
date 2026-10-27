@@ -14,7 +14,7 @@ jobs:
     strategy:
       matrix:
         php:
-          - '7.4'
+          - '8.0'
       fail-fast: false
     timeout-minutes: 5
     env:
@@ -43,9 +43,6 @@ jobs:
             composer-php${{ matrix.php }}-
             composer-
         continue-on-error: true
-
-      - name: "Install dependencies"
-        run: composer install --ansi --no-interaction --no-progress --no-suggest --prefer-dist
 
       - name: Run PHP-CS-Fixer fix
         run: php-cs-fixer fix --dry-run --diff --ansi

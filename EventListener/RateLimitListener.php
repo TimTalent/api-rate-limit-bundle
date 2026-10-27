@@ -50,14 +50,14 @@ class RateLimitListener
         $this->tokenStorage = $tokenStorage;
     }
 
-    public function onKernelRequest(RequestEvent $event)
+    public function onKernelRequest(RequestEvent $event): void
     {
         if (!$this->enabled) {
             return;
         }
 
-        // only process on master request
-        if (!$event->isMasterRequest()) {
+        // only process on main request
+        if (!$event->isMainRequest()) {
             return;
         }
 
@@ -80,9 +80,8 @@ class RateLimitListener
     /**
      * Returns an RateLimitExceededException.
      *
-     * @return RateLimitExceededException
      */
-    protected function createRateLimitExceededException(Request $request)
+    protected function createRateLimitExceededException(Request $request): RateLimitExceededException
     {
         $config = $this->exceptionConfig;
         $class = $config['custom_exception'] ?? RateLimitExceededException::class;
@@ -90,7 +89,7 @@ class RateLimitListener
 
         if (null !== $token = $this->tokenStorage->getToken()) {
             if (\is_object($token->getUser())) {
-                $username = $token->getUsername();
+                $username = $token->getUserIdentifier();
             }
         }
 

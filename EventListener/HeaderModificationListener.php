@@ -28,7 +28,7 @@ class HeaderModificationListener
         $this->header = $header;
     }
 
-    public function onKernelResponse(ResponseEvent $event)
+    public function onKernelResponse(ResponseEvent $event): void
     {
         if (false === $this->header['display']) {
             return;

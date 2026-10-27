@@ -15,16 +15,15 @@ use Indragunawan\ApiRateLimitBundle\Service\RateLimitHandler;
 use Indragunawan\ApiRateLimitBundle\Tests\Fixtures\Entity\DisableRateLimit;
 use Indragunawan\ApiRateLimitBundle\Tests\Fixtures\Entity\EnableRateLimit;
 use Indragunawan\ApiRateLimitBundle\Tests\Fixtures\Entity\EnableRateLimitPHP8;
+use Indragunawan\ApiRateLimitBundle\Tests\Fixtures\Entity\MethodRestricted;
 use Indragunawan\ApiRateLimitBundle\Tests\Fixtures\Entity\ThrottleConfigured;
 use PHPUnit\Framework\TestCase;
 use Psr\Cache\CacheItemInterface;
 use Psr\Cache\CacheItemPoolInterface;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Security\Core\Authentication\AuthenticationManagerInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
-use Symfony\Component\Security\Core\Authorization\AccessDecisionManagerInterface;
-use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 class RateLimitHandlerTest extends TestCase
@@ -41,7 +40,7 @@ class RateLimitHandlerTest extends TestCase
             ->method('getItem');
 
         $tokenStorage = $this->createMock(TokenStorage::class);
-        $authorizationChecker = $this->createMock(AuthorizationChecker::class);
+        $authorizationChecker = $this->createMock(AuthorizationCheckerInterface::class);
 
         $throttleConfig = [
             'default' => [
@@ -74,7 +73,7 @@ class RateLimitHandlerTest extends TestCase
             ->willReturn($cacheItem);
 
         $tokenStorage = $this->createMock(TokenStorage::class);
-        $authorizationChecker = $this->createMock(AuthorizationChecker::class);
+        $authorizationChecker = $this->createMock(AuthorizationCheckerInterface::class);
 
         $throttleConfig = [
             'default' => [
@@ -120,7 +119,7 @@ class RateLimitHandlerTest extends TestCase
             ->willReturn($cacheItem);
 
         $tokenStorage = $this->createMock(TokenStorage::class);
-        $authorizationChecker = $this->createMock(AuthorizationChecker::class);
+        $authorizationChecker = $this->createMock(AuthorizationCheckerInterface::class);
 
         $throttleConfig = [
             'default' => [
@@ -165,7 +164,7 @@ class RateLimitHandlerTest extends TestCase
             ->willReturn($cacheItem);
 
         $tokenStorage = $this->createMock(TokenStorage::class);
-        $authorizationChecker = $this->createMock(AuthorizationChecker::class);
+        $authorizationChecker = $this->createMock(AuthorizationCheckerInterface::class);
 
         $throttleConfig = [
             'default' => [
@@ -216,27 +215,19 @@ class RateLimitHandlerTest extends TestCase
             ->willReturn($user);
 
         $token->expects($this->once())
-            ->method('getUsername')
+            ->method('getUserIdentifier')
             ->willReturn('myusername');
-
-        $token->expects($this->once())
-            ->method('isAuthenticated')
-            ->willReturn(true);
 
         $tokenStorage = $this->createMock(TokenStorage::class);
         $tokenStorage->expects($this->any())
             ->method('getToken')
             ->willReturn($token);
 
-        $authenticationManager = $this->createMock(AuthenticationManagerInterface::class);
-        $accessDecisionManager = $this->createMock(AccessDecisionManagerInterface::class);
-        $accessDecisionManager->expects($this->once())
-            ->method('decide')
+        $authorizationChecker = $this->createMock(AuthorizationCheckerInterface::class);
+        $authorizationChecker->expects($this->once())
+            ->method('isGranted')
+            ->with('ROLE_USER')
             ->willReturn(true);
-
-        $authorizationChecker = $this->getMockBuilder(AuthorizationChecker::class)
-            ->setConstructorArgs([$tokenStorage, $authenticationManager, $accessDecisionManager])
-            ->getMock();
 
         $throttleConfig = [
             'default' => [
@@ -288,12 +279,9 @@ class RateLimitHandlerTest extends TestCase
             ->method('getToken')
             ->willReturn(null);
 
-        $authenticationManager = $this->createMock(AuthenticationManagerInterface::class);
-        $accessDecisionManager = $this->createMock(AccessDecisionManagerInterface::class);
-
-        $authorizationChecker = $this->getMockBuilder(AuthorizationChecker::class)
-            ->setConstructorArgs([$tokenStorage, $authenticationManager, $accessDecisionManager])
-            ->getMock();
+        $authorizationChecker = $this->createMock(AuthorizationCheckerInterface::class);
+        $authorizationChecker->expects($this->never())
+            ->method('isGranted');
 
         $throttleConfig = [
             'default' => [
@@ -337,7 +325,7 @@ class RateLimitHandlerTest extends TestCase
             ->willReturn($cacheItem);
 
         $tokenStorage = $this->createMock(TokenStorage::class);
-        $authorizationChecker = $this->createMock(AuthorizationChecker::class);
+        $authorizationChecker = $this->createMock(AuthorizationCheckerInterface::class);
 
         $throttleConfig = [
             'default' => [
@@ -387,27 +375,19 @@ class RateLimitHandlerTest extends TestCase
             ->willReturn($user);
 
         $token->expects($this->once())
-            ->method('getUsername')
+            ->method('getUserIdentifier')
             ->willReturn('myusername');
-
-        $token->expects($this->once())
-            ->method('isAuthenticated')
-            ->willReturn(true);
 
         $tokenStorage = $this->createMock(TokenStorage::class);
         $tokenStorage->expects($this->any())
             ->method('getToken')
             ->willReturn($token);
 
-        $authenticationManager = $this->createMock(AuthenticationManagerInterface::class);
-        $accessDecisionManager = $this->createMock(AccessDecisionManagerInterface::class);
-        $accessDecisionManager->expects($this->once())
-            ->method('decide')
+        $authorizationChecker = $this->createMock(AuthorizationCheckerInterface::class);
+        $authorizationChecker->expects($this->once())
+            ->method('isGranted')
+            ->with('ROLE_USER')
             ->willReturn(true);
-
-        $authorizationChecker = $this->getMockBuilder(AuthorizationChecker::class)
-            ->setConstructorArgs([$tokenStorage, $authenticationManager, $accessDecisionManager])
-            ->getMock();
 
         $throttleConfig = [
             'default' => [
@@ -456,7 +436,7 @@ class RateLimitHandlerTest extends TestCase
             ->willReturn($cacheItem);
 
         $tokenStorage = $this->createMock(TokenStorage::class);
-        $authorizationChecker = $this->createMock(AuthorizationChecker::class);
+        $authorizationChecker = $this->createMock(AuthorizationCheckerInterface::class);
 
         $throttleConfig = [
             'default' => [
@@ -478,5 +458,51 @@ class RateLimitHandlerTest extends TestCase
             'remaining' => 59,
             'reset' => gmdate('U') + 60,
         ], $rateLimitHandler->getRateLimitInfo());
+    }
+
+    /**
+     * @dataProvider methodRestrictedProvider
+     */
+    public function testMethodRestrictedRateLimit(string $method, array $attributes, int $expectedLimit)
+    {
+        $cacheItem = $this->createMock(CacheItemInterface::class);
+        $cacheItem->method('isHit')->willReturn(false);
+
+        $cacheItemPool = $this->createMock(CacheItemPoolInterface::class);
+        $cacheItemPool->expects($this->once())
+            ->method('getItem')
+            ->willReturn($cacheItem);
+
+        $tokenStorage = $this->createMock(TokenStorage::class);
+        $authorizationChecker = $this->createMock(AuthorizationCheckerInterface::class);
+
+        $throttleConfig = [
+            'default' => [
+                'limit' => 60,
+                'period' => 60,
+            ],
+            'roles' => [],
+        ];
+
+        $request = Request::create('/api/me', $method);
+        $request->attributes->set('_api_resource_class', MethodRestricted::class);
+        foreach ($attributes as $name => $value) {
+            $request->attributes->set($name, $value);
+        }
+
+        $rateLimitHandler = new RateLimitHandler($cacheItemPool, $tokenStorage, $authorizationChecker, $throttleConfig);
+        $rateLimitHandler->handle($request);
+
+        $this->assertTrue($rateLimitHandler->isEnabled());
+        $this->assertSame($expectedLimit, $rateLimitHandler->getRateLimitInfo()['limit']);
+    }
+
+    public function methodRestrictedProvider(): iterable
+    {
+        yield 'matching HTTP method uses the resource throttle' => ['POST', [], 8];
+        yield 'other HTTP method falls back to the global throttle' => ['GET', [], 60];
+        yield 'API Platform 2 item operation name' => ['GET', ['_api_item_operation_name' => 'custom_operation'], 8];
+        yield 'API Platform 3 operation name' => ['GET', ['_api_operation_name' => 'custom_operation'], 8];
+        yield 'other operation name falls back to the global throttle' => ['GET', ['_api_operation_name' => 'other_operation'], 60];
     }
 }

@@ -29,7 +29,7 @@ final class IndragunawanApiRateLimitExtension extends Extension
     /**
      * {@inheritdoc}
      */
-    public function load(array $configs, ContainerBuilder $container)
+    public function load(array $configs, ContainerBuilder $container): void
     {
         $configuration = new Configuration();
         $config = $this->processConfiguration($configuration, $configs);
@@ -41,7 +41,7 @@ final class IndragunawanApiRateLimitExtension extends Extension
         $this->registerServiceConfig($container, $config);
     }
 
-    private function registerEventListenerConfig(ContainerBuilder $container, array $config)
+    private function registerEventListenerConfig(ContainerBuilder $container, array $config): void
     {
         $container->getDefinition('indragunawan_api_rate_limit.event_listener.rate_limit')
             ->replaceArgument(0, $config['enabled'])
@@ -51,7 +51,7 @@ final class IndragunawanApiRateLimitExtension extends Extension
             ->replaceArgument(0, $config['header']);
     }
 
-    private function registerServiceConfig(ContainerBuilder $container, array $config)
+    private function registerServiceConfig(ContainerBuilder $container, array $config): void
     {
         if (null !== $config['cache']) {
             $cache = new Reference($config['cache']);

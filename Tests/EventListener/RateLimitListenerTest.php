@@ -28,7 +28,7 @@ class RateLimitListenerTest extends TestCase
         $event = $this->createMock(RequestEvent::class);
 
         $event->expects($this->never())
-            ->method('isMasterRequest')
+            ->method('isMainRequest')
             ->willReturn(true);
 
         $tokenStorage = $this->createMock(TokenStorage::class);
@@ -37,13 +37,13 @@ class RateLimitListenerTest extends TestCase
         $listener->onKernelRequest($event);
     }
 
-    public function testNotMasterRequest()
+    public function testNotMainRequest()
     {
         $rateLimitHandler = $this->createMock(RateLimitHandler::class);
         $event = $this->createMock(RequestEvent::class);
 
         $event->expects($this->once())
-            ->method('isMasterRequest')
+            ->method('isMainRequest')
             ->willReturn(false);
 
         $event->expects($this->never())
@@ -62,7 +62,7 @@ class RateLimitListenerTest extends TestCase
         $event = $this->createMock(RequestEvent::class);
 
         $event->expects($this->once())
-            ->method('isMasterRequest')
+            ->method('isMainRequest')
             ->willReturn(true);
 
         $request = Request::create('/api/me');
@@ -94,7 +94,7 @@ class RateLimitListenerTest extends TestCase
         $event = $this->createMock(RequestEvent::class);
 
         $event->expects($this->once())
-            ->method('isMasterRequest')
+            ->method('isMainRequest')
             ->willReturn(true);
 
         $request = Request::create('/api/me');
@@ -133,7 +133,7 @@ class RateLimitListenerTest extends TestCase
         $event = $this->createMock(RequestEvent::class);
 
         $event->expects($this->once())
-            ->method('isMasterRequest')
+            ->method('isMainRequest')
             ->willReturn(true);
 
         $request = Request::create('/api/me');
@@ -177,7 +177,7 @@ class RateLimitListenerTest extends TestCase
         $event = $this->createMock(RequestEvent::class);
 
         $event->expects($this->once())
-            ->method('isMasterRequest')
+            ->method('isMainRequest')
             ->willReturn(true);
 
         $request = Request::create('/api/me');
@@ -200,7 +200,7 @@ class RateLimitListenerTest extends TestCase
             ->willReturn($user);
 
         $token->expects($this->once())
-            ->method('getUsername')
+            ->method('getUserIdentifier')
             ->willReturn('user');
 
         $tokenStorage = $this->createMock(TokenStorage::class);

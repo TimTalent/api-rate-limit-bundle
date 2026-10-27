@@ -18,7 +18,7 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
  */
 class RateLimitExceededException extends HttpException
 {
-    public function __construct(int $statusCode, string $message, string $ip, string $username = null)
+    public function __construct(int $statusCode, string $message, string $ip, ?string $username = null)
     {
         $message = sprintf($message, $username ?: $ip);
 

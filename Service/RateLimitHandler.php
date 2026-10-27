@@ -59,7 +59,7 @@ class RateLimitHandler
     private $reset;
 
     /**
-     * @var
+     * @var bool
      */
     private $enabled = true;
 
@@ -83,18 +83,12 @@ class RateLimitHandler
         $this->throttleConfig = $throttleConfig;
     }
 
-    /**
-     * @return bool
-     */
-    public function isEnabled()
+    public function isEnabled(): bool
     {
         return $this->enabled;
     }
 
-    /**
-     * @return bool
-     */
-    public function isRateLimitExceeded()
+    public function isRateLimitExceeded(): bool
     {
         return $this->rateLimitExceeded;
     }
@@ -108,7 +102,7 @@ class RateLimitHandler
         ];
     }
 
-    public static function generateCacheKey(string $ip, string $username = null, string $userRole = null): string
+    public static function generateCacheKey(string $ip, ?string $username = null, ?string $userRole = null): string
     {
         if (!empty($username) && !empty($userRole)) {
             return sprintf('_api_rate_limit_metadata$%s', sha1($userRole.$username));
@@ -122,7 +116,7 @@ class RateLimitHandler
      * @throws \Psr\Cache\InvalidArgumentException
      * @throws \ReflectionException
      */
-    public function handle(Request $request)
+    public function handle(Request $request): void
     {
         $reflectionClass = new \ReflectionClass($request->attributes->get('_api_resource_class'));
         if (\PHP_VERSION_ID >= 80000 && $attributes = $reflectionClass->getAttributes(ApiRateLimit::class)) {
@@ -138,7 +132,7 @@ class RateLimitHandler
             if ((
                     !\in_array($request->getMethod(), array_map('strtoupper', $annotation->methods), true)
                     &&
-                    !\in_array($request->attributes->get('_api_item_operation_name'), array_map('strtolower', $annotation->methods), true)
+                    !\in_array($this->getOperationName($request), array_map('strtolower', $annotation->methods), true)
                 )
                 && !empty($annotation->methods)
             ) {
@@ -157,9 +151,17 @@ class RateLimitHandler
     }
 
     /**
+     * API Platform 2 exposes "_api_item_operation_name", API Platform 3+ exposes "_api_operation_name".
+     */
+    private function getOperationName(Request $request): ?string
+    {
+        return $request->attributes->get('_api_item_operation_name') ?? $request->attributes->get('_api_operation_name');
+    }
+
+    /**
      * @throws \Psr\Cache\InvalidArgumentException
      */
-    protected function decreaseRateLimitRemaining(string $key, int $limit, int $period)
+    protected function decreaseRateLimitRemaining(string $key, int $limit, int $period): void
     {
         $cost = 1;
         $currentTime = gmdate('U');
@@ -203,10 +205,7 @@ class RateLimitHandler
         $this->reset = $reset;
     }
 
-    /**
-     * @return array
-     */
-    private function getThrottle(Request $request, ApiRateLimit $annotation)
+    private function getThrottle(Request $request, ApiRateLimit $annotation): array
     {
         if (null !== $token = $this->tokenStorage->getToken()) {
             // no anonymous
@@ -218,7 +217,7 @@ class RateLimitHandler
 
                 foreach ($rolesConfig as $role => $throttle) {
                     if ($this->authorizationChecker->isGranted($role)) {
-                        $username = $token->getUsername();
+                        $username = $token->getUserIdentifier();
                         $userRole = $role;
                         $limit = $throttle['limit'];
                         $period = $throttle['period'];
